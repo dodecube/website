@@ -1,90 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stellar Nexus</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000000;
-      color: #FFFFFF;
-      font-family: 'Inter', sans-serif;
-    }
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      image-rendering: crisp-edges; /* Adds pixel-perfect rendering */
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="starfield"></canvas>
-
-  <script>
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.imageSmoothingEnabled = false; // Disable anti-aliasing
-
-    const stars = [];
-    const starCount = 200;
-
-    // Create stars with retro properties
-    for (let i = 0; i < starCount; i++) {
-      stars.push({
-        x: Math.floor(Math.random() * canvas.width),
-        y: Math.floor(Math.random() * canvas.height),
-        size: Math.random() < 0.3 ? 2 : 1, // 30% chance of 2x2 pixels
-        speed: Math.random() * 0.3 + 0.1
-      });
-    }
-
-    function drawStars() {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#FFFFFF'; // White stars
-
-      stars.forEach(star => {
-        ctx.fillRect(
-          Math.floor(star.x), // Pixel-perfect positioning
-          Math.floor(star.y),
-          star.size,
-          star.size
-        );
-        
-        // Update position with speed
-        star.y += star.speed;
-        
-        // Reset position when out of screen
-        if (star.y > canvas.height) {
-          star.y = 0;
-          star.x = Math.floor(Math.random() * canvas.width);
-        }
-      });
-
-      requestAnimationFrame(drawStars);
-    }
-
-    drawStars();
-
-    function scrollToSection() {
-      window.scrollTo({
-        top: window.innerHeight,
-        behavior: 'smooth'
-      });
-    }
-  </script>
-</body>
+<html>
+	<head>
+		<title>Page Title</title>
+	</head>
+	<body>
+		<h1>you know what the duck say? duck</h1>
+	</body>
 </html>
