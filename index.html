@@ -8,7 +8,7 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: #0A0A16;
+      background: #000000;
       color: #FFFFFF;
       font-family: 'Inter', sans-serif;
     }
@@ -17,6 +17,7 @@
       top: 0;
       left: 0;
       z-index: -1;
+      image-rendering: crisp-edges; /* Adds pixel-perfect rendering */
     }
     .container {
       display: flex;
@@ -25,48 +26,58 @@
       height: 100vh;
       text-align: center;
     }
-
   </style>
 </head>
 <body>
   <canvas id="starfield"></canvas>
 
-
   <script>
-    // Анимация звездного неба
     const canvas = document.getElementById('starfield');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    ctx.imageSmoothingEnabled = false; // Disable anti-aliasing
 
     const stars = [];
     const starCount = 200;
 
+    // Create stars with retro properties
     for (let i = 0; i < starCount; i++) {
       stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.5,
-        speed: Math.random() * 0.5
+        x: Math.floor(Math.random() * canvas.width),
+        y: Math.floor(Math.random() * canvas.height),
+        size: Math.random() < 0.3 ? 2 : 1, // 30% chance of 2x2 pixels
+        speed: Math.random() * 0.3 + 0.1
       });
     }
 
     function drawStars() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       stars.forEach(star => {
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(
+          Math.floor(star.x), // Pixel-perfect positioning
+          Math.floor(star.y),
+          star.size,
+          star.size
+        );
+        
+        // Update position with speed
         star.y += star.speed;
-        if (star.y > canvas.height) star.y = 0;
+        
+        // Reset position when out of screen
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.floor(Math.random() * canvas.width);
+        }
       });
+
       requestAnimationFrame(drawStars);
     }
 
     drawStars();
 
-    // Прокрутка к следующему разделу
     function scrollToSection() {
       window.scrollTo({
         top: window.innerHeight,
