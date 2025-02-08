@@ -52,8 +52,9 @@
     }
 
     function drawStars() {
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#FFFFFF'; // White stars
 
       stars.forEach(star => {
         ctx.fillRect(
