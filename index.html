@@ -1,9 +1,162 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Page Title</title>
-	</head>
-	<body>
-		<h1>you know what the duck say? duck</h1>
-	</body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DODECUBE PLACE PLS</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Константы для додекаэдра
+        const phi = (1 + Math.sqrt(5)) / 2;
+        const dodecahedronVertices = [
+            // Вершины куба (±1, ±1, ±1)
+            ...[-1, 1].flatMap(x => [-1, 1].flatMap(y => [-1, 1].map(z => [x, y, z]))),
+            // Вершины додекаэдра (0, ±1/φ, ±φ) и их перестановки
+            ...[0, 1, 2].flatMap(i => [-1/phi, 1/phi].flatMap(a => [-phi, phi].map(b => {
+                if (i === 0) return [0, a, b];
+                if (i === 1) return [a, b, 0];
+                return [b, 0, a];
+            })))
+        ];
+
+        // Рёбра додекаэдра
+        const edgeLengthSq = (2 / phi) ** 2;
+        const dodecahedronEdges = [];
+        for (let i = 0; i < dodecahedronVertices.length; i++) {
+            for (let j = i + 1; j < dodecahedronVertices.length; j++) {
+                const dx = dodecahedronVertices[i][0] - dodecahedronVertices[j][0];
+                const dy = dodecahedronVertices[i][1] - dodecahedronVertices[j][1];
+                const dz = dodecahedronVertices[i][2] - dodecahedronVertices[j][2];
+                if (Math.abs(dx * dx + dy * dy + dz * dz - edgeLengthSq) < 1e-6) {
+                    dodecahedronEdges.push([i, j]);
+                }
+            }
+        }
+
+        // Объекты для анимации
+        const shapes = [
+            { type: "cube", size: 100, angle: { x: 0, y: 0, z: 0 }, speed: { x: 0.01, y: 0.02, z: 0.03 }, color: "rgba(255, 255, 255, 0.8)" },
+            { type: "dodecahedron", size: 80, angle: { x: 0, y: 0, z: 0 }, speed: { x: 0.02, y: 0.03, z: 0.01 }, color: "rgba(255, 255, 255, 0.8)" }
+        ];
+
+        // Функция для проекции 3D в 2D
+        function project(vertex) {
+            const scale = 200; // Масштаб
+            const distance = 5; // Расстояние от камеры
+            const z = vertex[2] + distance;
+            return [
+                (vertex[0] * scale) / z + canvas.width / 2,
+                (vertex[1] * scale) / z + canvas.height / 2
+            ];
+        }
+
+        // Функция для вращения вершины
+        function rotate(vertex, angle) {
+            const { x, y, z } = angle;
+            const cosX = Math.cos(x), sinX = Math.sin(x);
+            const cosY = Math.cos(y), sinY = Math.sin(y);
+            const cosZ = Math.cos(z), sinZ = Math.sin(z);
+
+            let [vx, vy, vz] = vertex;
+
+            // Вращение вокруг оси X
+            let vy1 = vy * cosX - vz * sinX;
+            let vz1 = vy * sinX + vz * cosX;
+            vy = vy1;
+            vz = vz1;
+
+            // Вращение вокруг оси Y
+            let vx1 = vx * cosY + vz * sinY;
+            vz1 = -vx * sinY + vz * cosY;
+            vx = vx1;
+            vz = vz1;
+
+            // Вращение вокруг оси Z
+            vx1 = vx * cosZ - vy * sinZ;
+            vy1 = vx * sinZ + vy * cosZ;
+            vx = vx1;
+            vy = vy1;
+
+            return [vx, vy, vz];
+        }
+
+        // Отрисовка куба
+        function drawCube(size, angle, color) {
+            const hs = size / 2;
+            const vertices = [
+                [-hs, -hs, -hs], [hs, -hs, -hs], [hs, hs, -hs], [-hs, hs, -hs],
+                [-hs, -hs, hs], [hs, -hs, hs], [hs, hs, hs], [-hs, hs, hs]
+            ];
+            const edges = [
+                [0, 1], [1, 2], [2, 3], [3, 0],
+                [4, 5], [5, 6], [6, 7], [7, 4],
+                [0, 4], [1, 5], [2, 6], [3, 7]
+            ];
+
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            for (const [i, j] of edges) {
+                const v1 = project(rotate(vertices[i], angle));
+                const v2 = project(rotate(vertices[j], angle));
+                ctx.moveTo(v1[0], v1[1]);
+                ctx.lineTo(v2[0], v2[1]);
+            }
+            ctx.stroke();
+        }
+
+        // Отрисовка додекаэдра
+        function drawDodecahedron(size, angle, color) {
+            const hs = size / 2;
+            const scale = hs / phi;
+            const vertices = dodecahedronVertices.map(v => [v[0] * scale, v[1] * scale, v[2] * scale]);
+
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            for (const [i, j] of dodecahedronEdges) {
+                const v1 = project(rotate(vertices[i], angle));
+                const v2 = project(rotate(vertices[j], angle));
+                ctx.moveTo(v1[0], v1[1]);
+                ctx.lineTo(v2[0], v2[1]);
+            }
+            ctx.stroke();
+        }
+
+        // Основной цикл анимации
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const shape of shapes) {
+                shape.angle.x += shape.speed.x;
+                shape.angle.y += shape.speed.y;
+                shape.angle.z += shape.speed.z;
+
+                if (shape.type === "cube") {
+                    drawCube(shape.size, shape.angle, shape.color);
+                } else if (shape.type === "dodecahedron") {
+                    drawDodecahedron(shape.size, shape.angle, shape.color);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
 </html>
